@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang='en-us'>
+
+<head>
+  <title>img-pal</title>
+  <meta charset='utf-8'>
+  <link rel='icon' href='data:,'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
+  <link rel='stylesheet' href='./index.css'>
+  <script type='module' src='./index.js' defer></script>
+  <template id='tmpl-app'>
+    <main>
+      <section id='about'>
+        Gen palette from Image. ( <a href="https://github.com/ycw/img-pal">ycw/img-pal</a> )
+      </section>
+      <section id='inputs'>
+        <label for='file'>Image</label>
+        <input id='file' type='file' accept='image/*' 
+          @input='handleFile' 
+          v-bind:disabled='isProcessing'>
+
+        <label for='similarity'>Similarity</label>
+        <input id='similarity' type='range' min='5' max='255' step='5' 
+          v-model='similarity' 
+          v-bind:disabled='isProcessing || !imgUrl'
+          @change='handleSimilarity'>
+
+        <label for='color-format'>Color Format</label>
+        <select id='color-format' 
+          v-model='colorFormat'
+          v-bind:disabled='isProcessing || !imgUrl'
+          @change='handleColorFormat'>
+          <option>hex</option>
+          <option>HEX</option>
+          <option>rgb()</option>
+          <option>hsl()</option>
+        </select>
+      </section>
+      <section id='image-preview' v-if='imgUrl'>
+        <img id='img' v-bind:src='imgUrl'>
+      </section>
+      <section id='result' v-if='imgUrl'>
+        <table id='records' v-if='records.length'>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>color</th>
+              <th>value</th>
+              <th>ratio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for='(record, i) in records' :key='record.color'>
+              <td>{{ i + 1 }}</td>
+              <td :style='{ backgroundColor: record.color }'></td>
+              <td>{{ record.color }}</td>
+              <td><pre>{{ record.ratio }}</pre></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </template>
+</head>
+
+<body id='app'></body>
+
+</html>

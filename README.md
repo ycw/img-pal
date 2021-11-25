@@ -1,2 +1,5 @@
 # img-pal
-extract palette from images
+
+Gen palette from images.
+
+App: [https://ycw.github.io/img-pal/](https://ycw.github.io/img-pal/)
