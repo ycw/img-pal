@@ -8,21 +8,21 @@ self.onmessage = (e) => {
 
 function group(abRecords, similarity) {
   const arr = new Uint32Array(abRecords);
-  const grouped = [];
+  const groupedArr = []; // Array<[r,g,b,count]>
   for (let i = 0, I = arr.length; i < I; i += 4) {
     const r0 = arr.subarray(i, i + 4);
     let handled = false;
-    for (let j = 0, J = grouped.length; j < J; j += 4) {
-      const r1 = grouped.slice(j, j + 4);
+    for (const [j, r1] of groupedArr.entries()) {
       if (isSimilar(r0, r1, similarity)) {
-        grouped[j + 3] += r0[3];
+        r1[3] += r0[3];
         handled = true;
         break;
       }
     }
-    if (!handled) grouped.push.apply(grouped, r0);
+    if (!handled) groupedArr.push([...r0]);
   }
-  return new Uint32Array(grouped).buffer;
+  groupedArr.sort((a, b) => b[3] - a[3]);
+  return new Uint32Array(groupedArr.flat()).buffer;
 }
 
 
