@@ -27,7 +27,6 @@ function groupSimilar(rawRecords, similarity) {
 
 
 
-const unit = Math.sqrt(3);
 function isSimilar(a, b, similarity) {
-  return Math.sqrt((a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2) < (similarity * unit);
+  return ((a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2) < (similarity ** 2 * 3);
 }
