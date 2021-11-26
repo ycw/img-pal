@@ -67,34 +67,27 @@ a {
   grid-area: result;
   height: 100%;
   overflow: auto;
+  border-left: var(--border);
 }
 
 #records {
-  border: var(--border);
-  border-top-width: 0;
+  border-collapse: separate;
 }
 
 #records :is(td, th) {
   padding: 1rem;
-  box-sizing: border-box;
   font: 1rem/1 monospace;
+  box-sizing: border-box;
+  background: var(--bg);
+  border: var(--border);
+  border-width: 0 1px 1px 0;
 }
 
 #records thead {
   position: sticky;
   top: 0;
-  background: var(--bg);
-}
-
-#records thead tr {
-  box-sizing: border-box;
-  border-bottom: var(--border);
-  border-bottom-width: 5px;
 }
 
 #records tbody td:nth-of-type(2) {
   box-shadow: inset 0 -2px 5px 1px #0003;
 }
-
-
-
