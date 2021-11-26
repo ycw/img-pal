@@ -1,3 +1,7 @@
+import { ColorFmt, RatioFmt } from "./fmt";
+
+
+
 export function loadImage(imgUrl) {
   return new Promise((res, rej) => {
     const img = new Image();
@@ -21,105 +25,57 @@ export function getImageData(img) {
 
 
 
-export function countPixels(imgData) {
-  const data = imgData.data;
-  const countMap = new Map();
+export function genAbRecords({ data }) {
+  const countsTbl = new Map();
   for (let i = 0, I = data.length; i < I; i += 4) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
-    const idx = (r << 16) + (g << 8) + b;
-    if (countMap.has(idx)) {
-      countMap.set(idx, countMap.get(idx) + 1);
+    const idx = (data[i] << 16) + (data[i + 1] << 8) + data[i + 2];
+    if (countsTbl.has(idx)) {
+      countsTbl.set(idx, countsTbl.get(idx) + 1);
     } else {
-      countMap.set(idx, 1);
+      countsTbl.set(idx, 1);
     }
   }
 
-  return Array.from(countMap)
-    .map(([k, count]) => ({
-      r: k >> 16 & 0xff,
-      g: k >> 8 & 0xff,
-      b: k & 0xff,
-      count
-    }))
-    .sort((a, b) => b.count - a.count);
+  const sorted = Array.from(countsTbl).sort((a, b) => b[3] - a[3]);
+  const records = new Uint32Array(countsTbl.size * 4); // 4 for r,g,b,count
+  for (const [i, [k, count]] of sorted.entries()) {
+    records[i * 4] = k >> 16 & 0xff;
+    records[i * 4 + 1] = k >> 8 & 0xff;
+    records[i * 4 + 2] = k & 0xff;
+    records[i * 4 + 3] = count;
+  }
+  return records.buffer;
 }
 
 
 
 // ----
-// rawRecords {r,g,b,count} into records (for display) {color,ratio}
+// Gen records for display
 // ---
 
-export function intoRecords(rawRecords, colorFormat) {
-  const sum = rawRecords.reduce((o, nu) => o + nu.count, 0);
-  return rawRecords.map(({ r, g, b, count }) => {
-    return {
-      color: ColorFormatter[colorFormat](r, g, b),
-      ratio: (count / sum * 100).toFixed(5).padStart(8, ' ')
-    };
-  });
-}
-
-const ColorFormatter = {};
-
-ColorFormatter['hex'] = (r, g, b) => {
-  const rr = (r).toString(16).padStart(2, '0');
-  const gg = (g).toString(16).padStart(2, '0');
-  const bb = (b).toString(16).padStart(2, '0');
-  return `#${rr}${gg}${bb}`;
-};
-
-ColorFormatter['HEX'] = (r, g, b) => {
-  return ColorFormatter['hex'](r, g, b).toUpperCase();
-}
-
-ColorFormatter['rgb()'] = (r, g, b) => {
-  return `rgb(${r}, ${g}, ${b})`;
-};
-
-ColorFormatter['hsl()'] = (r, g, b) => {
-  const [h, s, l] = rgbToHsl(r, g, b);
-  const H = `${(h * 360) | 0}deg`;
-  const S = `${(s * 100).toPrecision(3)}%`;
-  const L = `${(l * 100).toPrecision(3)}%`;
-  return `hsl(${H}, ${S}, ${L})`;
-} 
-
-// ---
-// rgb to hsl
-// https://gist.github.com/emanuel-sanabria-developer/5793377
-// ---
-
-/**
- * Converts an RGB color value to HSL. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
- * Assumes r, g, and b are contained in the set [0, 255] and
- * returns h, s, and l in the set [0, 1].
- *
- * @param   Number  r       The red color value
- * @param   Number  g       The green color value
- * @param   Number  b       The blue color value
- * @return  Array           The HSL representation
- */
-function rgbToHsl(r, g, b) {
-  r /= 255, g /= 255, b /= 255;
-  var max = Math.max(r, g, b), min = Math.min(r, g, b);
-  var h, s, l = (max + min) / 2;
-
-  if (max == min) {
-    h = s = 0; // achromatic
-  } else {
-    var d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
-    }
-    h /= 6;
+export function intoRecords(abRecords, sum, fmt) {
+  const arr = new Uint32Array(abRecords);
+  const records = [];
+  for (let i = 0, I = arr.length; i < I; i += 4) {
+    const color = ColorFmt[fmt](...arr.subarray(i, i + 3));
+    const ratio = RatioFmt['%'](arr[i + 3], sum);
+    records.push({ color, ratio });
   }
+  return records;
+}
 
-  return [h, s, l];
+
+
+// ---
+// group similar
+// ---
+
+const wk = new Worker('./worker.js');
+
+export function groupAbRecords(abRecords, similarity) {
+  return new Promise((res, rej) => {
+    wk.onmessage = (e) => res(e.data);
+    wk.onerror = rej;
+    wk.postMessage({ abRecords, similarity }, [abRecords]);
+  });
 }
