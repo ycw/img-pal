@@ -1,4 +1,4 @@
-import { ColorFmt, RatioFmt } from "./fmt";
+import { ColorFmt, RatioFmt } from "./fmt.js";
 
 
 
