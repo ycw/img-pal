@@ -12,7 +12,7 @@ function group(abRecords, similarity) {
   for (let i = 0, I = arr.length; i < I; i += 4) {
     const r0 = arr.subarray(i, i + 4);
     let handled = false;
-    for (const [j, r1] of groupedArr.entries()) {
+    for (const r1 of groupedArr) {
       if (isSimilar(r0, r1, similarity)) {
         r1[3] += r0[3];
         handled = true;

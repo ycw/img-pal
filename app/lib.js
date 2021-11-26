@@ -25,15 +25,16 @@ export function getImageData(img) {
 
 
 
+// ---
+// Gen records; return arrbuf holding ui32 in form [r,g,b,count, r,g ...] 
+// ---
+
 export function genAbRecords({ data }) {
-  const countsTbl = new Map();
+  const countsTbl = new Map(); // Map<idx, count>
   for (let i = 0, I = data.length; i < I; i += 4) {
     const idx = (data[i] << 16) + (data[i + 1] << 8) + data[i + 2];
-    if (countsTbl.has(idx)) {
-      countsTbl.set(idx, countsTbl.get(idx) + 1);
-    } else {
-      countsTbl.set(idx, 1);
-    }
+    if (countsTbl.has(idx)) countsTbl.set(idx, countsTbl.get(idx) + 1);
+    else countsTbl.set(idx, 1);
   }
 
   const sorted = Array.from(countsTbl).sort((a, b) => b[3] - a[3]);
@@ -67,7 +68,7 @@ export function intoRecords(abRecords, sum, fmt) {
 
 
 // ---
-// group similar
+// Group similar
 // ---
 
 const wk = new Worker('./worker.js');
