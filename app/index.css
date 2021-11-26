@@ -1,60 +1,100 @@
+:root {
+  --bg: #fff;
+  --fg: #222;
+  --border: 1px solid var(--fg);
+  --link: #33a;
+}
+
+
 
 main {
   display: grid;
   width: 100%;
   height: 100vh;
   grid-template:
-    'about result' auto
-    'inputs result' auto 
+    'about   result' auto
+    'inputs  result' auto 
     'preview result' 1fr
   / minmax(40ch, 1fr) 3fr
     ;
   gap: 1rem;
-  padding: 1rem;
-  border-radius: 10px;
-  overflow: hidden;
-  box-sizing: border-box;
-  box-shadow: 0 0 10px #0003;
+  background: var(--bg);
+  color: var(--fg);
 }
+
+a {
+  color: var(--link);
+}
+
+
+#about {
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+
 
 #inputs {
   grid-area: inputs;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 1rem;
-  border: 1px solid #eee;
+  padding: 1rem;
+  box-sizing: border-box;
 }
+
+
 
 #image-preview {
   grid-area: preview;
-  border: 1px solid #eee;
-  display: grid;
   width: 100%;
   height: 100%;
   overflow: hidden;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 #img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
+
+
 #result {
   grid-area: result;
-  border: 1px solid #eee;
   height: 100%;
   overflow: auto;
+}
+
+#records {
+  border: var(--border);
+  border-top-width: 0;
 }
 
 #records :is(td, th) {
   padding: 1rem;
   box-sizing: border-box;
-  border: 1px solid #eee;
-  border-width: 0 1px 1px 0;
   font: 1rem/1 monospace;
 }
 
-pre {
-  white-space: pre;
+#records thead {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
 }
+
+#records thead tr {
+  box-sizing: border-box;
+  border-bottom: var(--border);
+  border-bottom-width: 5px;
+}
+
+#records tbody td:nth-of-type(2) {
+  box-shadow: inset 0 -2px 5px 1px #0003;
+}
+
+
+
